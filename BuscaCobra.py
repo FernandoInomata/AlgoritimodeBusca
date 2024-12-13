@@ -35,7 +35,9 @@ comida_y = round(random.randrange(0, ALTURA - TAMANHO) / 20.0) * 20.0
 
 pilha_caminho = []
 
-def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados):
+quadrados_percorridos = 0
+
+def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados, corpo_atual):
     if (cobra_x, cobra_y) == (destino_x, destino_y):
         return True
 
@@ -50,13 +52,13 @@ def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados):
         if nova_x >= LARGURA or nova_x < 0 or nova_y >= ALTURA or nova_y < 0:
             continue
 
-        if (nova_x, nova_y) in corpo_cobra:
+        if (nova_x, nova_y) in corpo_atual:
             continue
 
         if (nova_x, nova_y) in visitados:
             continue
 
-        if dfs(nova_x, nova_y, destino_x, destino_y, visitados):
+        if dfs(nova_x, nova_y, destino_x, destino_y, visitados, corpo_atual):
             pilha_caminho.append((movimento[0], movimento[1]))
             return True
 
@@ -64,9 +66,10 @@ def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados):
 
 def mover_cobra():
     global cobra_inicio_x, cobra_inicio_y, cobra_velocidade_x, cobra_velocidade_y
+    global quadrados_percorridos
 
     if not pilha_caminho:
-        dfs(cobra_inicio_x, cobra_inicio_y, comida_x, comida_y, set())
+        dfs(cobra_inicio_x, cobra_inicio_y, comida_x, comida_y, set(), set(tuple(c) for c in corpo_cobra))
 
     if pilha_caminho:
         movimento = pilha_caminho.pop()
@@ -75,14 +78,23 @@ def mover_cobra():
     cobra_inicio_x += cobra_velocidade_x
     cobra_inicio_y += cobra_velocidade_y
 
+    quadrados_percorridos += 1
+    atualizar_textos()
+
 pontuacao = 0
 
 fonte = pygame.font.Font(None, 36)
 
-pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, VERDE)
+def atualizar_textos():
+    global pontuacao_texto, quadrados_texto
+    pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, VERDE)
+    quadrados_texto = fonte.render("Quadrados: " + str(quadrados_percorridos), True, VERDE)
+
+atualizar_textos()
 
 def mostrar_pontuacao():
     tela.blit(pontuacao_texto, (10, 10))
+    tela.blit(quadrados_texto, (10, 40))
 
 jogo_em_andamento = True
 while jogo_em_andamento:
@@ -93,14 +105,14 @@ while jogo_em_andamento:
     mover_cobra()
 
     if cobra_inicio_x >= LARGURA or cobra_inicio_x < 0 or cobra_inicio_y >= ALTURA or cobra_inicio_y < 0:
-        jogo_em_andamento = True
+        jogo_em_andamento = False
 
     if cobra_inicio_x == comida_x and cobra_inicio_y == comida_y:
         comida_x = round(random.randrange(0, LARGURA - TAMANHO) / 20.0) * 20.0
         comida_y = round(random.randrange(0, ALTURA - TAMANHO) / 20.0) * 20.0
         comprimento_cobra += 1
         pontuacao += 1
-        pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, VERDE)
+        atualizar_textos()
 
     if comprimento_cobra > (LARGURA/TAMANHO * ALTURA/TAMANHO):
         jogo_em_andamento = False
@@ -117,7 +129,7 @@ while jogo_em_andamento:
 
     for segmento in corpo_cobra[:-1]:
         if segmento[0] == cabeca_cobra[0] and segmento[1] == cabeca_cobra[1]:
-            jogo_em_andamento = True
+            jogo_em_andamento = False
 
     for segmento in corpo_cobra:
         pygame.draw.rect(tela, VERDE, [segmento[0], segmento[1], TAMANHO, TAMANHO])
@@ -128,4 +140,5 @@ while jogo_em_andamento:
 
     controle_fps.tick(FPS)
 
+print("Quantidade de Quadrados: ", quadrados_percorridos)
 pygame.quit()

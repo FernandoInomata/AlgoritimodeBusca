@@ -155,6 +155,7 @@ while jogo_em_andamento:
     pygame.display.update()
 
     controle_fps.tick(FPS)
-
+    
+print("Pontuação: ", pontuacao)
 print("Quantidade de Quadrados: ", quadrados_percorridos)
 pygame.quit()

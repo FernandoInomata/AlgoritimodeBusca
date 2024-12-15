@@ -12,7 +12,7 @@ FUNDO = (0, 0, 0)
 PONTUACAO = (0, 255, 0)
 COMIDA = (255, 0, 0)
 
-TAMANHO = 20
+TAMANHO = 20    
 
 FPS = 30
 
@@ -170,7 +170,7 @@ def mostrar_pontuacao():
     Função para mostrar a pontuação na tela
     '''
     
-    texto = fonte.render("Pontuação: " + str(pontuacao), True, PONTUACAO)
+    texto = fonte.render("Pontuação: " + str(pontuacao), True, (255, 255, 255))
     tela.blit(texto, (10, 10))
 
 
@@ -207,7 +207,7 @@ while jogo_em_andamento:
         comprimento_cobra += 1
         pontuacao += 1
         pilha_caminho = a_star(cobra_inicio_x, cobra_inicio_y, comida_x, comida_y)
-        pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, PONTUACAO)
+        pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, (255, 255, 255))
 
     tela.fill(FUNDO)
     mostrar_pontuacao()

@@ -12,7 +12,7 @@ VERMELHO = (255, 0, 0)
 
 TAMANHO = 20
 
-FPS = 30
+FPS = 60
 
 pygame.init()
 
@@ -30,12 +30,36 @@ cobra_velocidade_y = TAMANHO
 corpo_cobra = []
 comprimento_cobra = 1
 
-comida_x = round(random.randrange(0, LARGURA - TAMANHO) / 20.0) * 20.0
-comida_y = round(random.randrange(0, ALTURA - TAMANHO) / 20.0) * 20.0
+comida_x = 0
+comida_y = 0
 
 pilha_caminho = []
 
 quadrados_percorridos = 0
+
+pontuacao = 0
+
+fonte = pygame.font.Font(None, 36)
+
+
+def atualizar_textos():
+    global pontuacao_texto, quadrados_texto
+    pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, VERDE)
+    quadrados_texto = fonte.render("Quadrados: " + str(quadrados_percorridos), True, VERDE)
+
+
+atualizar_textos()
+
+
+def gerar_comida():
+    global comida_x, comida_y
+    while True:
+        comida_x = round(random.randrange(0, LARGURA - TAMANHO) / 20.0) * 20.0
+        comida_y = round(random.randrange(0, ALTURA - TAMANHO) / 20.0) * 20.0
+        # Verifica se a comida não está no corpo da cobra
+        if (comida_x, comida_y) not in [(segmento[0], segmento[1]) for segmento in corpo_cobra]:
+            break
+
 
 def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados, corpo_atual):
     if (cobra_x, cobra_y) == (destino_x, destino_y):
@@ -64,6 +88,7 @@ def dfs(cobra_x, cobra_y, destino_x, destino_y, visitados, corpo_atual):
 
     return False
 
+
 def mover_cobra():
     global cobra_inicio_x, cobra_inicio_y, cobra_velocidade_x, cobra_velocidade_y
     global quadrados_percorridos
@@ -81,20 +106,14 @@ def mover_cobra():
     quadrados_percorridos += 1
     atualizar_textos()
 
-pontuacao = 0
-
-fonte = pygame.font.Font(None, 36)
-
-def atualizar_textos():
-    global pontuacao_texto, quadrados_texto
-    pontuacao_texto = fonte.render("Pontuação: " + str(pontuacao), True, VERDE)
-    quadrados_texto = fonte.render("Quadrados: " + str(quadrados_percorridos), True, VERDE)
-
-atualizar_textos()
 
 def mostrar_pontuacao():
     tela.blit(pontuacao_texto, (10, 10))
     tela.blit(quadrados_texto, (10, 40))
+
+
+# Inicializa a primeira comida
+gerar_comida()
 
 jogo_em_andamento = True
 while jogo_em_andamento:
@@ -108,21 +127,18 @@ while jogo_em_andamento:
         jogo_em_andamento = False
 
     if cobra_inicio_x == comida_x and cobra_inicio_y == comida_y:
-        comida_x = round(random.randrange(0, LARGURA - TAMANHO) / 20.0) * 20.0
-        comida_y = round(random.randrange(0, ALTURA - TAMANHO) / 20.0) * 20.0
+        gerar_comida()
         comprimento_cobra += 1
         pontuacao += 1
         atualizar_textos()
 
-    if comprimento_cobra > (LARGURA/TAMANHO * ALTURA/TAMANHO):
+    if comprimento_cobra > (LARGURA / TAMANHO * ALTURA / TAMANHO):
         jogo_em_andamento = False
 
     tela.fill(PRETO)
     mostrar_pontuacao()
 
-    cabeca_cobra = []
-    cabeca_cobra.append(cobra_inicio_x)
-    cabeca_cobra.append(cobra_inicio_y)
+    cabeca_cobra = [cobra_inicio_x, cobra_inicio_y]
     corpo_cobra.append(cabeca_cobra)
     if len(corpo_cobra) > comprimento_cobra:
         del corpo_cobra[0]
